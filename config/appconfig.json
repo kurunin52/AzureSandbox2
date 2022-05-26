@@ -1,0 +1,9 @@
+{
+    "TestApp:Settings:BackgroundColor":"#FFF",
+    "TestApp:Settings:FontColor":"#000",
+    "TestApp:Settings:FontSize":"24",
+    "TestApp:Settings:Message": "Message data",
+    "Hoge": {
+        "hoge": "hogehoge"
+    }
+}
