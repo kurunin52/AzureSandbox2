@@ -16,5 +16,5 @@ steps:
     AppConfigurationEndpoint: 'https://appconfigimporttest.azconfig.io'
     ConfigurationFile: 'config/appconfig.json'
     Separator: ':'
-    Prefix: 'PRD'
+    Prefix: 'PRD:'
     Strict: false
