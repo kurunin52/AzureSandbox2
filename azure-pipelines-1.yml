@@ -17,4 +17,6 @@ steps:
     ConfigurationFile: 'config/appconfig.json'
     Separator: ':'
     Prefix: 'PRD:'
+    Label: 'Push test'
+    Tags: '{"isTest": "true", "isSample": true}'
     Strict: false
