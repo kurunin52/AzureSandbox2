@@ -18,5 +18,5 @@ steps:
     Separator: ':'
     Prefix: 'PRD:'
     Label: 'Push test'
-    Tags: '{"isTest": "true", "isSample": true}'
+    Tags: '{"isTest": "true"}'
     Strict: false
