@@ -14,7 +14,7 @@ steps:
   inputs:
     azureSubscription: 'testConnection'
     AppConfigurationEndpoint: 'https://appconfigimporttest.azconfig.io'
-    ConfigurationFile: './config/appsetting.json'
+    ConfigurationFile: 'config/appconfig.json'
     Separator: ':'
     Prefix: 'PRD'
     Strict: false
