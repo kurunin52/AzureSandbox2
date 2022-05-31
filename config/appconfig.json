@@ -4,6 +4,7 @@
     "TestApp:Settings:FontSize":"24",
     "TestApp:Settings:Message": "Message data",
     "Hoge": {
-        "hoge": "hogehoge"
+        "hoge": "hogehoge",
+        "fuga":"fuga"
     }
 }
