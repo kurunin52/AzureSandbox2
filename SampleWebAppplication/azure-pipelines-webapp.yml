@@ -42,7 +42,7 @@ steps:
     azureSubscription: 'testConnection'
     appType: 'webApp'
     WebAppName: 'kurunin52SampleWebApp'
-    packageForLinux: '$(System.DefaultWorkingDirectory)/**/*.zip'
+    packageForLinux: '$(Build.ArtifactStagingDirectory))/**/*.zip'
 
 # - task: VSTest@2
 #   inputs:
