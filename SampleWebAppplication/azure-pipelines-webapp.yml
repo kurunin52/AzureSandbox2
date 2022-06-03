@@ -28,6 +28,14 @@ steps:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
 
+- task: AzureRmWebAppDeployment@4
+  inputs:
+    ConnectionType: 'AzureRM'
+    azureSubscription: 'testConnection'
+    appType: 'webApp'
+    WebAppName: 'kurunin52SampleWebApp'
+    packageForLinux: '$(System.DefaultWorkingDirectory)/**/*.zip'
+
 # - task: VSTest@2
 #   inputs:
 #     platform: '$(buildPlatform)'
