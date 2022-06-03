@@ -16,6 +16,20 @@ variables:
 
 jobs: 
 - job: jobA
+  steps:  
+  - task: AzureAppConfigurationPush@3
+    inputs:
+      azureSubscription: 'testConnection'
+      AppConfigurationEndpoint: 'https://appconfigimporttest.azconfig.io'
+      ConfigurationFile: 'config/appconfig.json'
+      Separator: ':'
+      Prefix: 'PRD:'
+      Label: 'Pushtest'
+      Tags: '{"isTest": "true"}'
+      Strict: false
+
+- job: jobB
+  dependsOn: jobA
   steps:
   - task: NuGetToolInstaller@1
 
