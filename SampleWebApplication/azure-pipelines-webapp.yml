@@ -67,10 +67,14 @@ stages:
   - job: jobE
     pool: Server
     steps:
-    - task: ManualIntervention@8
+    - task: ManualValidation@0
       inputs:
-        emailRecipients: 'kurunin52@gmail.com'
+        notifyUsers: 'kurunin52@gmail.com'
         onTimeout: 'resume'
+    # - task: ManualIntervention@8
+    #   inputs:
+    #     emailRecipients: 'kurunin52@gmail.com'
+    #     onTimeout: 'resume'
 
 - stage: stageB
   dependsOn: [stageC, stageD]
