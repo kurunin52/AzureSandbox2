@@ -68,7 +68,7 @@ stages:
         azureSubscription: 'testConnection'
         appType: 'webApp'
         WebAppName: 'kurunin52SampleWebApp'
-        packageForLinux: '/**/*.zip'
+        packageForLinux: '$(Pipeline.Workspace)/**/*.zip'
 
 # - task: VSTest@2
 #   inputs:
