@@ -45,16 +45,16 @@ stages:
         msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)"'
         platform: '$(buildPlatform)'
         configuration: '$(buildConfiguration)'
-    - task: ArchiveFiles@2
-      inputs:
-        rootFolderOrFile: '$(binPath)'
-        includeRootFolder: true
-        archiveType: 'zip'
-        archiveFile: '$(binPath)/$(Build.BuildId).zip'
-        replaceExistingArchive: true
+    # - task: ArchiveFiles@2
+    #   inputs:
+    #     rootFolderOrFile: '$(binPath)'
+    #     includeRootFolder: true
+    #     archiveType: 'zip'
+    #     archiveFile: '$(binPath)/$(Build.BuildId).zip'
+    #     replaceExistingArchive: true
     - task: PublishPipelineArtifact@1
       inputs:
-        targetPath: '$(binPath)/$(Build.BuildId).zip'
+        targetPath: '$(Build.ArtifactStagingDirectory)/SampleWebApplication.zip'
         artifact: 'drop'
         publishLocation: 'pipeline'
 
@@ -91,7 +91,7 @@ stages:
         azureSubscription: 'testConnection'
         appType: 'webApp'
         WebAppName: 'kurunin52SampleWebApp'
-        packageForLinux: '$(binPath)/**/*.zip'
+        packageForLinux: '$(Build.ArtifactStagingDirectory)/**/*.zip'
 
 # - task: VSTest@2
 #   inputs:
