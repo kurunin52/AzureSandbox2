@@ -54,10 +54,10 @@ stages:
   jobs: 
   - job: jobC
     steps:
-    - task: ManualIntervention@8
+    - task: ManualValidation@0
       inputs:
-        instructions: '承認してください'
-        emailRecipients: 'kurunin52@gmail.com'
+        notifyUsers: 'kurunin52@gmail.com'
+        onTimeout: 'resume'
     - task: ArchiveFiles@2
       inputs:
         rootFolderOrFile: '$(Pipeline.Workspace)'
