@@ -14,47 +14,54 @@ variables:
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
 
-jobs: 
-- job: jobA
-  steps:  
-  - task: AzureAppConfigurationPush@3
-    inputs:
-      azureSubscription: 'testConnection'
-      AppConfigurationEndpoint: 'https://appconfigimporttest.azconfig.io'
-      ConfigurationFile: 'config/appconfig.json'
-      Separator: ':'
-      Prefix: 'PRD:'
-      Label: 'Pushtest'
-      Tags: '{"isTest": "true"}'
-      Strict: false
+stages:
+- stage: stageA
+  jobs: 
+  - job: jobA
+    steps:  
+    - task: AzureAppConfigurationPush@3
+      inputs:
+        azureSubscription: 'testConnection'
+        AppConfigurationEndpoint: 'https://appconfigimporttest.azconfig.io'
+        ConfigurationFile: 'config/appconfig.json'
+        Separator: ':'
+        Prefix: 'PRD:'
+        Label: 'Pushtest'
+        Tags: '{"isTest": "true"}'
+        Strict: false
 
-- job: jobB
-  # dependsOn: jobA
-  steps:
-  - task: NuGetToolInstaller@1
+  - job: jobB
+    # dependsOn: jobA
+    steps:
+    - task: NuGetToolInstaller@1
 
-  - task: NuGetCommand@2
-    inputs:
-      restoreSolution: '$(solution)'
+    - task: NuGetCommand@2
+      inputs:
+        restoreSolution: '$(solution)'
 
-  - task: VSBuild@1
-    inputs:
-      solution: '$(solution)'
-      msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)"'
-      platform: '$(buildPlatform)'
-      configuration: '$(buildConfiguration)'
-  - task: PublishPipelineArtifact@1
-    inputs:
-      targetPath: '$(Pipeline.Workspace)'
-      artifact: 'drop'
-      publishLocation: 'pipeline'
-  - task: AzureRmWebAppDeployment@4
-    inputs:
-      ConnectionType: 'AzureRM'
-      azureSubscription: 'testConnection'
-      appType: 'webApp'
-      WebAppName: 'kurunin52SampleWebApp'
-      packageForLinux: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+    - task: VSBuild@1
+      inputs:
+        solution: '$(solution)'
+        msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)"'
+        platform: '$(buildPlatform)'
+        configuration: '$(buildConfiguration)'
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: '$(Pipeline.Workspace)'
+        artifact: 'drop'
+        publishLocation: 'pipeline'
+
+- stage: stageB
+  jobs: 
+  - job: jobC
+    steps:
+    - task: AzureRmWebAppDeployment@4
+      inputs:
+        ConnectionType: 'AzureRM'
+        azureSubscription: 'testConnection'
+        appType: 'webApp'
+        WebAppName: 'kurunin52SampleWebApp'
+        packageForLinux: '$(Build.ArtifactStagingDirectory)/**/*.zip'
 
 # - task: VSTest@2
 #   inputs:
