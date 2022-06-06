@@ -53,6 +53,7 @@ stages:
 - stage: stageC
   jobs:
   - job: jobD
+    pool: Server
     steps:
     - task: ManualValidation@0
       inputs:
