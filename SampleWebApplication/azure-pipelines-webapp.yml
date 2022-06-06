@@ -59,6 +59,10 @@ stages:
       inputs:
         notifyUsers: 'kurunin52@gmail.com'
         onTimeout: 'resume'
+    - task: ManualIntervention@8
+      inputs:
+        emailRecipients: 'kurunin52@gmail.com'
+        onTimeout: 'resume'
 
 - stage: stageB
   dependsOn: stageC
