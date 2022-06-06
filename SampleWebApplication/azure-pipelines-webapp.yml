@@ -10,6 +10,7 @@ pool:
   vmImage: 'windows-latest'
 variables:
   solution: 'SampleWebApplication/SampleWebApplication.sln'
+  binPath: 'SampleWebApplication/bin/release/net6.0'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
 
@@ -46,7 +47,7 @@ stages:
         configuration: '$(buildConfiguration)'
     - task: PublishPipelineArtifact@1
       inputs:
-        targetPath: '$(Pipeline.Workspace)'
+        targetPath: '$(binPath)'
         artifact: 'drop'
         publishLocation: 'pipeline'
 
@@ -71,10 +72,6 @@ stages:
       inputs:
         notifyUsers: 'kurunin52@gmail.com'
         onTimeout: 'resume'
-    # - task: ManualIntervention@8
-    #   inputs:
-    #     emailRecipients: 'kurunin52@gmail.com'
-    #     onTimeout: 'resume'
 
 - stage: stageB
   dependsOn: [stageC, stageD]
@@ -83,10 +80,10 @@ stages:
     steps:
     - task: ArchiveFiles@2
       inputs:
-        rootFolderOrFile: '$(build.artifactStagingDirectory)'
+        rootFolderOrFile: '$(binPath)'
         includeRootFolder: true
         archiveType: 'zip'
-        archiveFile: '$(build.artifactStagingDirectory)/$(Build.BuildId).zip'
+        archiveFile: '$(binPath)/$(Build.BuildId).zip'
         replaceExistingArchive: true
     - task: AzureRmWebAppDeployment@4
       inputs:
@@ -94,7 +91,7 @@ stages:
         azureSubscription: 'testConnection'
         appType: 'webApp'
         WebAppName: 'kurunin52SampleWebApp'
-        packageForLinux: '$(build.artifactStagingDirectory)/**/*.zip'
+        packageForLinux: '$(binPath)/**/*.zip'
 
 # - task: VSTest@2
 #   inputs:
