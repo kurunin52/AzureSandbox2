@@ -51,6 +51,7 @@ stages:
         publishLocation: 'pipeline'
 
 - stage: stageC
+  dependsOn: stageA
   jobs:
   - job: jobD
     pool: Server
@@ -59,13 +60,20 @@ stages:
       inputs:
         notifyUsers: 'kurunin52@gmail.com'
         onTimeout: 'resume'
+
+- stage: stageD
+  dependsOn: stageA
+  jobs:
+  - job: jobE
+    pool: Server
+    steps:
     - task: ManualIntervention@8
       inputs:
         emailRecipients: 'kurunin52@gmail.com'
         onTimeout: 'resume'
 
 - stage: stageB
-  dependsOn: stageC
+  dependsOn: [stageC, stageD]
   jobs: 
   - job: jobC
     steps:
