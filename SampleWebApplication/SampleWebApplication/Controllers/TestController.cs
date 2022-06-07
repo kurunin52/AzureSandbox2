@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Xml;
 
 namespace SampleWebApplication.Controllers
 {
@@ -7,12 +8,12 @@ namespace SampleWebApplication.Controllers
     [ApiController]
     public class TestController : ControllerBase
     {
-        public string Get(string myParam)
+        public string Get(string input)
         {
-            var rnd = new Random();
-            byte[] buffer = new byte[16];
-            rnd.NextBytes(buffer);
-            return BitConverter.ToString(buffer);
+            var doc = new XmlDocument { XmlResolver = null };
+            doc.LoadXml(@"<Config></Config>");
+            var results = doc.SelectNodes("/Config/Devices/Device[id='" + input + "']");
+            return results[0].InnerText;
         }
     }
 }
