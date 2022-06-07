@@ -3,21 +3,17 @@
 # Add steps that publish symbols, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
 
-trigger:
-- main
-
 pool:
   vmImage: 'windows-latest'
-
 variables:
   solution: 'SampleWebApplication/SampleWebApplication.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
 
 stages:
-- stage: stageA
+- stage: builder
   jobs: 
-  - job: jobA
+  - job: putAppConfiguration
     steps:  
     - task: AzureAppConfigurationPush@3
       inputs:
@@ -30,8 +26,7 @@ stages:
         Tags: '{"isTest": "true"}'
         Strict: false
 
-  - job: jobB
-    # dependsOn: jobA
+  - job: buildApp
     steps:
     - task: NuGetToolInstaller@1
 
@@ -47,21 +42,42 @@ stages:
         configuration: '$(buildConfiguration)'
     - task: PublishPipelineArtifact@1
       inputs:
-        targetPath: '$(Pipeline.Workspace)'
-        artifact: 'drop'
+        targetPath: '$(Build.ArtifactStagingDirectory)/SampleWebApplication.zip'
+        artifact: 'app'
         publishLocation: 'pipeline'
 
-- stage: stageB
-  jobs: 
-  - job: jobC
+- stage: validationA
+  dependsOn: builder
+  jobs:
+  - job: validationA
+    pool: Server
     steps:
-    - task: ArchiveFiles@2
+    - task: ManualValidation@0
       inputs:
-        rootFolderOrFile: '$(Pipeline.Workspace)'
-        includeRootFolder: true
-        archiveType: 'zip'
-        archiveFile: '$(Pipeline.Workspace)/$(Build.BuildId).zip'
-        replaceExistingArchive: true
+        notifyUsers: 'kurunin52@gmail.com'
+        onTimeout: 'resume'
+
+- stage: validationB
+  dependsOn: builder
+  jobs:
+  - job: validationB
+    pool: Server
+    steps:
+    - task: ManualValidation@0
+      inputs:
+        notifyUsers: 'kurunin52@gmail.com'
+        onTimeout: 'resume'
+
+- stage: stageB
+  dependsOn: [validationA, validationB]
+  jobs: 
+  - job: deployApp
+    steps:
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        buildType: 'current'
+        artifactName: 'app'
+        targetPath: '$(Pipeline.Workspace)'
     - task: AzureRmWebAppDeployment@4
       inputs:
         ConnectionType: 'AzureRM'
@@ -69,8 +85,3 @@ stages:
         appType: 'webApp'
         WebAppName: 'kurunin52SampleWebApp'
         packageForLinux: '$(Pipeline.Workspace)/**/*.zip'
-
-# - task: VSTest@2
-#   inputs:
-#     platform: '$(buildPlatform)'
-#     configuration: '$(buildConfiguration)'
