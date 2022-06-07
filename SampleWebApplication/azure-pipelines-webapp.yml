@@ -36,7 +36,8 @@ stages:
     - task: DotNetCoreCLI@2
       inputs:
         command: 'custom'
-        custom: 'tool install --global security-scan'
+        custom: 'tool'
+        arguments: 'install --global security-scan'
     - task: CmdLine@2
       inputs:
         script: 'security-scan $(solution)'
