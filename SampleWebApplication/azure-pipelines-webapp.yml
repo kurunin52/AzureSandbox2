@@ -85,19 +85,24 @@ stages:
   jobs: 
   - job: deployApp
     steps:
-    - task: DownloadBuildArtifacts@1
+    # - task: DownloadBuildArtifacts@1
+    #   inputs:
+    #     buildType: 'current'
+    #     downloadType: 'single'
+    #     artifactName: 'app'
+    #     downloadPath: '$(System.ArtifactsDirectory)'
+    - task: DownloadPipelineArtifact@2
       inputs:
         buildType: 'current'
-        downloadType: 'single'
         artifactName: 'app'
-        downloadPath: '$(System.ArtifactsDirectory)'
+        targetPath: '$(Pipeline.Workspace)'
     - task: AzureRmWebAppDeployment@4
       inputs:
         ConnectionType: 'AzureRM'
         azureSubscription: 'testConnection'
         appType: 'webApp'
         WebAppName: 'kurunin52SampleWebApp'
-        packageForLinux: '$(System.ArtifactsDirectory)/**/*.zip'
+        packageForLinux: '$(Pipeline.Workspace)/**/*.zip'
 
 # - task: VSTest@2
 #   inputs:
