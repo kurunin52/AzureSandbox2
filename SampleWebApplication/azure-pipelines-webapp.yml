@@ -49,6 +49,11 @@ stages:
           !**\obj\**
         searchFolder: '$(System.DefaultWorkingDirectory)'
         testRunTitle: 'simpleTest'
+    - task: PublishTestResults@2
+      inputs:
+        testResultsFormat: 'NUnit'
+        testResultsFiles: '**/TEST-*.xml'
+        testRunTitle: 'simpleTest'
     - task: PublishPipelineArtifact@1
       inputs:
         targetPath: '$(Build.ArtifactStagingDirectory)/SampleWebApplication.zip'
