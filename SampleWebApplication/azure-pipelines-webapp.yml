@@ -33,14 +33,6 @@ stages:
     - task: NuGetCommand@2
       inputs:
         restoreSolution: '$(solution)'
-    - task: DotNetCoreCLI@2
-      inputs:
-        command: 'custom'
-        custom: 'tool'
-        arguments: 'install --global security-scan'
-    - task: CmdLine@2
-      inputs:
-        script: 'security-scan $(solution)'
 
     - task: VSBuild@1
       inputs:
@@ -62,6 +54,14 @@ stages:
         testResultsFormat: 'NUnit'
         testResultsFiles: '**/TEST-*.xml'
         testRunTitle: 'simpleTest'
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'custom'
+        custom: 'tool'
+        arguments: 'install --global security-scan'
+    - task: CmdLine@2
+      inputs:
+        script: 'security-scan $(solution)'
     - task: PublishPipelineArtifact@1
       inputs:
         targetPath: '$(Build.ArtifactStagingDirectory)/SampleWebApplication.zip'
