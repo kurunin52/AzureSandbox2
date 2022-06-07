@@ -1,0 +1,24 @@
+# ASP.NET
+# Build and test ASP.NET projects.
+# Add steps that publish symbols, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
+
+pool:
+  vmImage: 'windows-latest'
+
+steps:
+- task: DownloadPipelineArtifact@2
+  inputs:
+    buildType: 'specific'
+    project: 'f7781e0a-92d0-4e2d-9f29-71ae5e5f598a'
+    definition: '6'
+    buildVersionToDownload: 'latest'
+    artifactName: 'app'
+    targetPath: '$(Pipeline.Workspace)'
+- task: AzureRmWebAppDeployment@4
+  inputs:
+    ConnectionType: 'AzureRM'
+    azureSubscription: 'testConnection'
+    appType: 'webApp'
+    WebAppName: 'kurunin52SampleWebApp'
+    packageForLinux: '$(Pipeline.Workspace)/**/*.zip'
