@@ -12,7 +12,8 @@ steps:
     buildType: 'specific'
     project: 'f7781e0a-92d0-4e2d-9f29-71ae5e5f598a'
     definition: '6'
-    buildVersionToDownload: 'latest'
+    buildVersionToDownload: 'specific'
+    pipelineId: '$(targetBuild)'
     artifactName: 'app'
     targetPath: '$(Pipeline.Workspace)'
 - task: AzureRmWebAppDeployment@4
