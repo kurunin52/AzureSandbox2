@@ -3,14 +3,10 @@
 # Add steps that publish symbols, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
 
-trigger:
-- main
-
 pool:
   vmImage: 'windows-latest'
 variables:
   solution: 'SampleWebApplication/SampleWebApplication.sln'
-  binPath: 'SampleWebApplication/bin/release/net6.0'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
 
@@ -31,7 +27,6 @@ stages:
         Strict: false
 
   - job: buildApp
-    # dependsOn: putAppConfiguration
     steps:
     - task: NuGetToolInstaller@1
 
@@ -45,13 +40,6 @@ stages:
         msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)"'
         platform: '$(buildPlatform)'
         configuration: '$(buildConfiguration)'
-    # - task: ArchiveFiles@2
-    #   inputs:
-    #     rootFolderOrFile: '$(binPath)'
-    #     includeRootFolder: true
-    #     archiveType: 'zip'
-    #     archiveFile: '$(binPath)/$(Build.BuildId).zip'
-    #     replaceExistingArchive: true
     - task: PublishPipelineArtifact@1
       inputs:
         targetPath: '$(Build.ArtifactStagingDirectory)/SampleWebApplication.zip'
@@ -85,12 +73,6 @@ stages:
   jobs: 
   - job: deployApp
     steps:
-    # - task: DownloadBuildArtifacts@1
-    #   inputs:
-    #     buildType: 'current'
-    #     downloadType: 'single'
-    #     artifactName: 'app'
-    #     downloadPath: '$(System.ArtifactsDirectory)'
     - task: DownloadPipelineArtifact@2
       inputs:
         buildType: 'current'
@@ -103,8 +85,3 @@ stages:
         appType: 'webApp'
         WebAppName: 'kurunin52SampleWebApp'
         packageForLinux: '$(Pipeline.Workspace)/**/*.zip'
-
-# - task: VSTest@2
-#   inputs:
-#     platform: '$(buildPlatform)'
-#     configuration: '$(buildConfiguration)'
