@@ -63,22 +63,11 @@ stages:
 - stage: validationA
   dependsOn: builder
   jobs:
-  - job: validationA
-    pool: Server
-    steps:
-    - task: ManualValidation@0
-      inputs:
-        notifyUsers: 'kurunin52@gmail.com'
-        onTimeout: 'resume'
-
-- stage: validationB
-  dependsOn: builder
-  jobs:
   - deployment: DeployApp
     environment: 'SampleWebApplication'
 
 - stage: stageB
-  dependsOn: [validationA, validationB]
+  dependsOn: validationA
   jobs: 
   - job: deployApp
     steps:
