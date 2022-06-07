@@ -3,19 +3,26 @@
 # Add steps that publish symbols, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
 
+resources:
+  pipelines:
+    - pipeline: releasedPipeline
+      source: AzureSandbox (2)
+
 pool:
   vmImage: 'windows-latest'
 
 steps:
-- task: DownloadPipelineArtifact@2
-  inputs:
-    buildType: 'specific'
-    project: 'f7781e0a-92d0-4e2d-9f29-71ae5e5f598a'
-    definition: '6'
-    buildVersionToDownload: 'specific'
-    pipelineId: '$(targetBuild)'
-    artifactName: 'app'
-    targetPath: '$(Pipeline.Workspace)'
+# - task: DownloadPipelineArtifact@2
+#   inputs:
+#     buildType: 'specific'
+#     project: 'f7781e0a-92d0-4e2d-9f29-71ae5e5f598a'
+#     definition: '6'
+#     buildVersionToDownload: 'specific'
+#     pipelineId: '$(targetBuild)'
+#     artifactName: 'app'
+#     targetPath: '$(Pipeline.Workspace)'
+- download: releasedPipeline
+  artifact: app
 - task: AzureRmWebAppDeployment@4
   inputs:
     ConnectionType: 'AzureRM'
