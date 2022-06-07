@@ -15,9 +15,9 @@ variables:
   buildConfiguration: 'Release'
 
 stages:
-- stage: stageA
+- stage: builder
   jobs: 
-  - job: jobA
+  - job: putAppConfiguration
     steps:  
     - task: AzureAppConfigurationPush@3
       inputs:
@@ -30,8 +30,8 @@ stages:
         Tags: '{"isTest": "true"}'
         Strict: false
 
-  - job: jobB
-    # dependsOn: jobA
+  - job: buildApp
+    # dependsOn: putAppConfiguration
     steps:
     - task: NuGetToolInstaller@1
 
@@ -58,10 +58,10 @@ stages:
         artifact: 'app'
         publishLocation: 'pipeline'
 
-- stage: stageC
-  dependsOn: stageA
+- stage: validationA
+  dependsOn: builder
   jobs:
-  - job: jobD
+  - job: validationA
     pool: Server
     steps:
     - task: ManualValidation@0
@@ -69,10 +69,10 @@ stages:
         notifyUsers: 'kurunin52@gmail.com'
         onTimeout: 'resume'
 
-- stage: stageD
-  dependsOn: stageA
+- stage: validationB
+  dependsOn: builder
   jobs:
-  - job: jobE
+  - job: validationB
     pool: Server
     steps:
     - task: ManualValidation@0
@@ -81,9 +81,9 @@ stages:
         onTimeout: 'resume'
 
 - stage: stageB
-  dependsOn: [stageC, stageD]
+  dependsOn: [validationA, validationB]
   jobs: 
-  - job: jobC
+  - job: deployApp
     steps:
     - task: DownloadBuildArtifacts@1
       inputs:
