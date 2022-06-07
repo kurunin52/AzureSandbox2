@@ -85,6 +85,8 @@ stages:
 - stage: stageB
   dependsOn: [validationA, validationB]
   jobs: 
+  - deployment: DeployApp
+    environment: 'SampleWebApplication'
   - job: deployApp
     steps:
     - task: DownloadPipelineArtifact@2
