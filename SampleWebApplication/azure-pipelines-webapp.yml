@@ -33,6 +33,14 @@ stages:
     - task: NuGetCommand@2
       inputs:
         restoreSolution: '$(solution)'
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'custom'
+        custom: 'tool'
+        arguments: 'install --global security-scan'
+    - task: CmdLine@2
+      inputs:
+        script: 'security-scan $(solution)'
 
     - task: VSBuild@1
       inputs:
@@ -40,6 +48,20 @@ stages:
         msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)"'
         platform: '$(buildPlatform)'
         configuration: '$(buildConfiguration)'
+    - task: VSTest@2
+      inputs:
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: |
+          **\*test*.dll
+          !**\*TestAdapter.dll
+          !**\obj\**
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        testRunTitle: 'simpleTest'
+    - task: PublishTestResults@2
+      inputs:
+        testResultsFormat: 'NUnit'
+        testResultsFiles: '**/TEST-*.xml'
+        testRunTitle: 'simpleTest'
     - task: PublishPipelineArtifact@1
       inputs:
         targetPath: '$(Build.ArtifactStagingDirectory)/SampleWebApplication.zip'
@@ -49,27 +71,11 @@ stages:
 - stage: validationA
   dependsOn: builder
   jobs:
-  - job: validationA
-    pool: Server
-    steps:
-    - task: ManualValidation@0
-      inputs:
-        notifyUsers: 'kurunin52@gmail.com'
-        onTimeout: 'resume'
-
-- stage: validationB
-  dependsOn: builder
-  jobs:
-  - job: validationB
-    pool: Server
-    steps:
-    - task: ManualValidation@0
-      inputs:
-        notifyUsers: 'kurunin52@gmail.com'
-        onTimeout: 'resume'
+  - deployment: DeployApp
+    environment: 'SampleWebApplication'
 
 - stage: stageB
-  dependsOn: [validationA, validationB]
+  dependsOn: validationA
   jobs: 
   - job: deployApp
     steps:
