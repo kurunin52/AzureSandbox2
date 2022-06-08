@@ -25,7 +25,7 @@ stages:
       inputs:
         archiveFilePatterns: 'codeql-win64.zip'
         destinationFolder: '$(Pipeline.Workspace)'
-        cleanDestinationFolder: true
+        cleanDestinationFolder: false
         overwriteExistingFiles: false
     - task: CmdLine@2
       inputs:
