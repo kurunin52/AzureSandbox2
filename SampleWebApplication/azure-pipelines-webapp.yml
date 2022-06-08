@@ -71,12 +71,17 @@ stages:
         targetPath: '$(Build.ArtifactStagingDirectory)/SampleWebApplication.zip'
         artifact: 'app'
         publishLocation: 'pipeline'
-    - task: PublishPipelineArtifact@1
-      displayName: PublishSscanResult
+    - task: PublishBuildArtifacts@1
       inputs:
-        targetPath: '$(Pipeline.Workspace)/result.sarif'
-        artifact: 'CodeAnalysisLogs'
-        publishLocation: 'pipeline'
+        PathtoPublish: '$($(Pipeline.Workspace)/result.sarif'
+        ArtifactName: 'CodeAnalysisLogs'
+        publishLocation: 'Container'
+    # - task: PublishPipelineArtifact@1
+    #   displayName: PublishSscanResult
+    #   inputs:
+    #     targetPath: '$(Pipeline.Workspace)/result.sarif'
+    #     artifact: 'CodeAnalysisLogs'
+    #     publishLocation: 'pipeline'
 
 - stage: validationA
   dependsOn: builder
