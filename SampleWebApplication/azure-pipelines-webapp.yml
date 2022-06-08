@@ -64,7 +64,7 @@ stages:
         arguments: 'install --global security-scan'
     - task: CmdLine@2
       inputs:
-        script: 'security-scan $(solution) --export=result.sarif'
+        script: 'security-scan $(solution) --export=$(Pipeline.Workspace)/result.sarif'
     - task: PublishPipelineArtifact@1
       displayName: PublishApp
       inputs:
