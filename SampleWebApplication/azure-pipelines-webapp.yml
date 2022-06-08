@@ -14,6 +14,28 @@ variables:
   buildConfiguration: 'Release'
 
 stages:
+- stage: analyze
+  jobs: 
+  - job: analyze
+    steps: 
+    - task: CmdLine@2
+      inputs:
+        script: 'curl https://github.com/github/codeql-cli-binaries/releases/download/v2.9.3/codeql-win64.zip -O -J -L'
+    - task: ExtractFiles@1
+      inputs:
+        archiveFilePatterns: 'codeql-win64.zip'
+        destinationFolder: '$(Pipeline.Workspace)'
+        cleanDestinationFolder: true
+        overwriteExistingFiles: false
+    - task: CmdLine@2
+      inputs:
+        script: |
+          got clone https://github.com/github/codeql.git
+          mkdir databases
+          codeql database create -l=csharp -s=$(Pipeline.Workspace)\SampleWebApplication databases\SampleWebApplication
+          codeql database analyze databases\SampleWebApplication --format=sarif-latest --output=$(Pipeline.Workspace)\analyzerRes.sarif codeql\csharp\ql\src\codeql-suites\csharp-lgtm.qls
+        workingDirectory: '$(Pipeline.Workspace)\codeql'
+
 - stage: builder
   jobs: 
   - job: putAppConfiguration
