@@ -73,7 +73,7 @@ stages:
         publishLocation: 'pipeline'
     - task: PublishBuildArtifacts@1
       inputs:
-        PathtoPublish: '$($(Pipeline.Workspace)/result.sarif'
+        PathtoPublish: '$(Pipeline.Workspace)/result.sarif'
         ArtifactName: 'CodeAnalysisLogs'
         publishLocation: 'Container'
     # - task: PublishPipelineArtifact@1
