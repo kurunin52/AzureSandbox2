@@ -30,7 +30,7 @@ stages:
     - task: CmdLine@2
       inputs:
         script: |
-          got clone https://github.com/github/codeql.git
+          git clone https://github.com/github/codeql.git
           mkdir databases
           codeql database create -l=csharp -s=$(Build.SourcesDirectory)\SampleWebApplication databases\SampleWebApplication
           codeql database analyze databases\SampleWebApplication --format=sarif-latest --output=$(Pipeline.Workspace)\analyzerRes.sarif codeql\csharp\ql\src\codeql-suites\csharp-lgtm.qls
