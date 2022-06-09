@@ -122,6 +122,10 @@ stages:
   jobs: 
   - job: analyze
     steps: 
+    - task: Npm@1
+      inputs:
+        command: 'custom'
+        customCommand: 'install -g pnpm'
     - task: CmdLine@2
       inputs:
         script: 'curl https://github.com/github/codeql-cli-binaries/releases/download/v2.9.3/codeql-win64.zip -O -J -L'
