@@ -65,7 +65,7 @@ stages:
         script: |
           git clone https://github.com/github/codeql.git queries
           mkdir databases
-          codeql database create -l=javascript -s=$(Build.SourcesDirectory)\sample_front_end_application databases\sample_front_end_application
+          codeql database create -l=javascript -s=$(Build.SourcesDirectory)\sample_front_end_application -c="pnpm run build" databases\sample_front_end_application
           codeql database analyze databases\sample_front_end_application --format=sarif-latest --output=$(Pipeline.Workspace)\analyzerRes_a.sarif queries\javascript\ql\src\codeql-suites\javascript-security-and-quality.qls
           codeql database analyze databases\sample_front_end_application --format=sarif-latest --output=$(Pipeline.Workspace)\analyzerRes_b.sarif queries\javascript\ql\src\codeql-suites\javascript-security-extended.qls
         workingDirectory: '$(Pipeline.Workspace)\codeql'
