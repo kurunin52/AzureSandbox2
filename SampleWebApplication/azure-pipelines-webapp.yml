@@ -14,6 +14,40 @@ variables:
   buildConfiguration: 'Release'
 
 stages:
+- stage: analyze
+  jobs: 
+  - job: analyze
+    steps: 
+    - task: CmdLine@2
+      inputs:
+        script: 'curl https://github.com/github/codeql-cli-binaries/releases/download/v2.9.3/codeql-win64.zip -O -J -L'
+    - task: ExtractFiles@1
+      inputs:
+        archiveFilePatterns: 'codeql-win64.zip'
+        destinationFolder: '$(Pipeline.Workspace)'
+        cleanDestinationFolder: false
+        overwriteExistingFiles: false
+    - task: CmdLine@2
+      inputs:
+        script: |
+          git clone https://github.com/github/codeql.git queries
+          mkdir databases
+          codeql database create -l=csharp -s=$(Build.SourcesDirectory)\SampleWebApplication databases\SampleWebApplication
+          codeql database analyze databases\SampleWebApplication --format=sarif-latest --output=$(Pipeline.Workspace)\analyzerRes_a.sarif queries\csharp\ql\src\codeql-suites\csharp-security-and-quality.qls
+          codeql database analyze databases\SampleWebApplication --format=sarif-latest --output=$(Pipeline.Workspace)\analyzerRes_b.sarif queries\csharp\ql\src\codeql-suites\csharp-security-extended.qls
+        workingDirectory: '$(Pipeline.Workspace)\codeql'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Pipeline.Workspace)\analyzerRes_a.sarif'
+        ArtifactName: 'CodeAnalysisLogs'
+        publishLocation: 'Container'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Pipeline.Workspace)\analyzerRes_b.sarif'
+        ArtifactName: 'CodeAnalysisLogs'
+        publishLocation: 'Container'
+    
+
 - stage: builder
   jobs: 
   - job: putAppConfiguration
@@ -64,12 +98,24 @@ stages:
         arguments: 'install --global security-scan'
     - task: CmdLine@2
       inputs:
-        script: 'security-scan $(solution)'
+        script: 'security-scan $(solution) --export=$(Pipeline.Workspace)\result.sarif'
     - task: PublishPipelineArtifact@1
+      displayName: PublishApp
       inputs:
         targetPath: '$(Build.ArtifactStagingDirectory)/SampleWebApplication.zip'
         artifact: 'app'
         publishLocation: 'pipeline'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Pipeline.Workspace)/result.sarif'
+        ArtifactName: 'CodeAnalysisLogs'
+        publishLocation: 'Container'
+    # - task: PublishPipelineArtifact@1
+    #   displayName: PublishSscanResult
+    #   inputs:
+    #     targetPath: '$(Pipeline.Workspace)/result.sarif'
+    #     artifact: 'CodeAnalysisLogs'
+    #     publishLocation: 'pipeline'
 
 - stage: validationA
   dependsOn: builder
