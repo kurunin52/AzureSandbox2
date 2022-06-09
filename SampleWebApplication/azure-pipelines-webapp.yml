@@ -33,12 +33,17 @@ stages:
           git clone https://github.com/github/codeql.git queries
           mkdir databases
           codeql database create -l=csharp -s=$(Build.SourcesDirectory)\SampleWebApplication databases\SampleWebApplication
-          codeql database analyze databases\SampleWebApplication --format=sarif-latest --output=$(Pipeline.Workspace)\analyzerRes.sarif queries\csharp\ql\src\codeql-suites\csharp-security-and-quality.qls
-          codeql database analyze databases\SampleWebApplication --format=sarif-latest --output=$(Pipeline.Workspace)\analyzerRes.sarif queries\csharp\ql\src\codeql-suites\csharp-security-extended.qls
+          codeql database analyze databases\SampleWebApplication --format=sarif-latest --output=$(Pipeline.Workspace)\analyzerRes_a.sarif queries\csharp\ql\src\codeql-suites\csharp-security-and-quality.qls
+          codeql database analyze databases\SampleWebApplication --format=sarif-latest --output=$(Pipeline.Workspace)\analyzerRes_b.sarif queries\csharp\ql\src\codeql-suites\csharp-security-extended.qls
         workingDirectory: '$(Pipeline.Workspace)\codeql'
     - task: PublishBuildArtifacts@1
       inputs:
-        PathtoPublish: '$(Pipeline.Workspace)\analyzerRes.sarif'
+        PathtoPublish: '$(Pipeline.Workspace)\analyzerRes_a.sarif'
+        ArtifactName: 'CodeAnalysisLogs'
+        publishLocation: 'Container'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Pipeline.Workspace)\analyzerRes_b.sarif'
         ArtifactName: 'CodeAnalysisLogs'
         publishLocation: 'Container'
     
