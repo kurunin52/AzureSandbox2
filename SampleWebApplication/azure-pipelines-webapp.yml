@@ -128,6 +128,10 @@ stages:
         customCommand: 'install -g pnpm'
     - task: CmdLine@2
       inputs:
+        script: 'pnpm install'
+        workingDirectory: '$(Build.SourcesDirectory)\SampleWebApplication'
+    - task: CmdLine@2
+      inputs:
         script: 'curl https://github.com/github/codeql-cli-binaries/releases/download/v2.9.3/codeql-win64.zip -O -J -L'
     - task: ExtractFiles@1
       inputs:
