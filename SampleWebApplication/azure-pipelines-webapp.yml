@@ -129,7 +129,7 @@ stages:
     - task: CmdLine@2
       inputs:
         script: 'pnpm install'
-        workingDirectory: '$(Build.SourcesDirectory)\SampleWebApplication'
+        workingDirectory: '$(Build.SourcesDirectory)\sample_front_end_application'
     - task: CmdLine@2
       inputs:
         script: 'curl https://github.com/github/codeql-cli-binaries/releases/download/v2.9.3/codeql-win64.zip -O -J -L'
