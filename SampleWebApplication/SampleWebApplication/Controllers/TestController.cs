@@ -13,6 +13,17 @@ namespace SampleWebApplication.Controllers
             var doc = new XmlDocument { XmlResolver = null };
             doc.LoadXml(@"<Config></Config>");
             var results = doc.SelectNodes("/Config/Devices/Device[id='" + input + "']");
+
+            using (XmlWriter writer = XmlWriter.Create("employees.xml"))
+            {
+                writer.WriteStartDocument();
+
+                // BAD: Insert user input directly into XML
+                writer.WriteRaw("<employee><name>" + input + "</name></employee>");
+
+                writer.WriteEndElement();
+                writer.WriteEndDocument();
+            }
             return results[0].InnerText;
         }
     }
