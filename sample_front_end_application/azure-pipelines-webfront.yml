@@ -9,7 +9,7 @@ pr: none
 pool:
   vmImage: 'windows-latest'
 variables:
-  solution: 'SampleWebApplication/SampleWebApplication.sln'
+  # solution: 'SampleWebApplication/SampleWebApplication.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
 
@@ -31,27 +31,27 @@ stages:
 
   - job: buildApp
     steps:
-    - task: NuGetToolInstaller@1
+    # - task: NuGetToolInstaller@1
 
-    - task: NuGetCommand@2
-      inputs:
-        restoreSolution: '$(solution)'
+    # - task: NuGetCommand@2
+    #   inputs:
+    #     restoreSolution: '$(solution)'
 
-    - task: VSBuild@1
-      inputs:
-        solution: '$(solution)'
-        msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)"'
-        platform: '$(buildPlatform)'
-        configuration: '$(buildConfiguration)'
-    - task: VSTest@2
-      inputs:
-        testSelector: 'testAssemblies'
-        testAssemblyVer2: |
-          **\*test*.dll
-          !**\*TestAdapter.dll
-          !**\obj\**
-        searchFolder: '$(System.DefaultWorkingDirectory)'
-        testRunTitle: 'simpleTest'
+    # - task: VSBuild@1
+    #   inputs:
+    #     solution: '$(solution)'
+    #     msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)"'
+    #     platform: '$(buildPlatform)'
+    #     configuration: '$(buildConfiguration)'
+    # - task: VSTest@2
+    #   inputs:
+    #     testSelector: 'testAssemblies'
+    #     testAssemblyVer2: |
+    #       **\*test*.dll
+    #       !**\*TestAdapter.dll
+    #       !**\obj\**
+    #     searchFolder: '$(System.DefaultWorkingDirectory)'
+    #     testRunTitle: 'simpleTest'
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'NUnit'
@@ -76,12 +76,26 @@ stages:
         PathtoPublish: '$(Pipeline.Workspace)/result.sarif'
         ArtifactName: 'CodeAnalysisLogs'
         publishLocation: 'Container'
+    # - task: PublishPipelineArtifact@1
+    #   displayName: PublishSscanResult
+    #   inputs:
+    #     targetPath: '$(Pipeline.Workspace)/result.sarif'
+    #     artifact: 'CodeAnalysisLogs'
+    #     publishLocation: 'pipeline'
 
-- stage: analyzeCSharp
+- stage: analyzeJavascript
   dependsOn: builder
   jobs: 
   - job: analyze
     steps: 
+    - task: Npm@1
+      inputs:
+        command: 'custom'
+        customCommand: 'install -g pnpm'
+    - task: CmdLine@2
+      inputs:
+        script: 'pnpm install'
+        workingDirectory: '$(Build.SourcesDirectory)\sample_front_end_application'
     - task: CmdLine@2
       inputs:
         script: 'curl https://github.com/github/codeql-cli-binaries/releases/download/v2.9.3/codeql-win64.zip -O -J -L'
@@ -96,21 +110,21 @@ stages:
         script: |
           git clone https://github.com/github/codeql.git queries
           mkdir databases
-          codeql database create -l=csharp -s=$(Build.SourcesDirectory)\SampleWebApplication databases\SampleWebApplication
-          codeql query compile -j=0 --fast-compilation queries\csharp\ql\src\codeql-suites\csharp-security-extended.qls
-          codeql database analyze databases\SampleWebApplication --format=sarif-latest --output=$(Pipeline.Workspace)\analyzerRes_cs.sarif queries\csharp\ql\src\codeql-suites\csharp-security-extended.qls
+          codeql database create -l=javascript -s=$(Build.SourcesDirectory)\sample_front_end_application -c="pnpm run build" databases\sample_front_end_application
+          codeql query compile -j=0 --fast-compilation queries\javascript\ql\src\codeql-suites\javascript-security-extended.qls
+          codeql database analyze databases\sample_front_end_application --format=sarif-latest --output=$(Pipeline.Workspace)\analyzerRes_js.sarif queries\javascript\ql\src\codeql-suites\javascript-security-extended.qls
         workingDirectory: '$(Pipeline.Workspace)\codeql'
     - task: PublishBuildArtifacts@1
       inputs:
-        PathtoPublish: '$(Pipeline.Workspace)\analyzerRes_cs.sarif'
+        PathtoPublish: '$(Pipeline.Workspace)\analyzerRes_js.sarif'
         ArtifactName: 'CodeAnalysisLogs'
         publishLocation: 'Container'
 
 - stage: validation
-  dependsOn: analyzeCSharp
+  dependsOn: analyzeJavascript
   jobs:
   - deployment: DeployApp
-    environment: 'SampleWebApplication'
+    environment: 'SampleWebfront'
 
 - stage: stageB
   dependsOn: validation
