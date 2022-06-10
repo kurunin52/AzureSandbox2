@@ -26,7 +26,11 @@ stages:
       inputs:
         script: |
           pnpm install
-          pnpm build
+        workingDirectory: '$(project)'
+    - task: CmdLine@2
+      inputs:
+        script: |
+          pnpm run build
         workingDirectory: '$(project)'
     - task: PublishBuildArtifacts@1
       inputs:
