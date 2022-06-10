@@ -70,7 +70,7 @@ stages:
     - task: CmdLine@2
       inputs:
         script: |
-          codeql database analyze databases\$(project) -j=0 --fast-compilation --format=sarif-latest --output=$(Pipeline.Workspace)\analyzerRes_js.sarif queries\javascript\ql\src\codeql-suites\javascript-security-extended.qls
+          codeql database analyze databases\$(project) --format=sarif-latest --output=$(Pipeline.Workspace)\analyzerRes_js.sarif queries\javascript\ql\src\codeql-suites\javascript-security-extended.qls
         workingDirectory: '$(Pipeline.Workspace)\codeql'
     - task: PublishBuildArtifacts@1
       inputs:
