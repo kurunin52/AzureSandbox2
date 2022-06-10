@@ -30,7 +30,7 @@ stages:
         workingDirectory: '$(project)'
     - task: PublishBuildArtifacts@1
       inputs:
-        PathtoPublish: '$(project)'
+        PathtoPublish: '$(project)\dist'
         ArtifactName: 'webfront'
         publishLocation: 'Container'
 
