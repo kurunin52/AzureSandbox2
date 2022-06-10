@@ -27,7 +27,7 @@ steps:
 - task: CmdLine@2
   inputs:
     script: |
-      codeql query compile --compilation-cache='$(Pipeline.Workspace)\codeql\.cache' 'queries\csharp\ql\src\Security Features\CWE-091\XMLInjection.ql'
+      codeql query compile --compilation-cache=$(Pipeline.Workspace)\codeql\.cache 'queries\csharp\ql\src\Security Features\CWE-091\XMLInjection.ql'
     workingDirectory: '$(Pipeline.Workspace)\codeql'
 - task: ArchiveFiles@2
   inputs:
