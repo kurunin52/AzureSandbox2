@@ -9,79 +9,30 @@ pr: none
 pool:
   vmImage: 'windows-latest'
 variables:
-  # solution: 'SampleWebApplication/SampleWebApplication.sln'
+  project: 'sample_front_end_application'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
 
 stages:
 - stage: builder
   jobs: 
-  - job: putAppConfiguration
-    steps:  
-    - task: AzureAppConfigurationPush@3
-      inputs:
-        azureSubscription: 'testConnection'
-        AppConfigurationEndpoint: 'https://appconfigimporttest.azconfig.io'
-        ConfigurationFile: 'config/appconfig.json'
-        Separator: ':'
-        Prefix: 'PRD:'
-        Label: 'Pushtest'
-        Tags: '{"isTest": "true"}'
-        Strict: false
-
   - job: buildApp
     steps:
-    # - task: NuGetToolInstaller@1
-
-    # - task: NuGetCommand@2
-    #   inputs:
-    #     restoreSolution: '$(solution)'
-
-    # - task: VSBuild@1
-    #   inputs:
-    #     solution: '$(solution)'
-    #     msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)"'
-    #     platform: '$(buildPlatform)'
-    #     configuration: '$(buildConfiguration)'
-    # - task: VSTest@2
-    #   inputs:
-    #     testSelector: 'testAssemblies'
-    #     testAssemblyVer2: |
-    #       **\*test*.dll
-    #       !**\*TestAdapter.dll
-    #       !**\obj\**
-    #     searchFolder: '$(System.DefaultWorkingDirectory)'
-    #     testRunTitle: 'simpleTest'
-    - task: PublishTestResults@2
-      inputs:
-        testResultsFormat: 'NUnit'
-        testResultsFiles: '**/TEST-*.xml'
-        testRunTitle: 'simpleTest'
-    - task: DotNetCoreCLI@2
+    - task: Npm@1
       inputs:
         command: 'custom'
-        custom: 'tool'
-        arguments: 'install --global security-scan'
+        customCommand: 'install --global pnpm'
     - task: CmdLine@2
       inputs:
-        script: 'security-scan $(solution) --export=$(Pipeline.Workspace)\result.sarif'
-    - task: PublishPipelineArtifact@1
-      displayName: PublishApp
-      inputs:
-        targetPath: '$(Build.ArtifactStagingDirectory)/SampleWebApplication.zip'
-        artifact: 'app'
-        publishLocation: 'pipeline'
+        script: |
+          pnpm install
+          pnpm run build
+        workingDirectory: '$(project)'
     - task: PublishBuildArtifacts@1
       inputs:
-        PathtoPublish: '$(Pipeline.Workspace)/result.sarif'
-        ArtifactName: 'CodeAnalysisLogs'
+        PathtoPublish: '$(project)'
+        ArtifactName: 'webfront'
         publishLocation: 'Container'
-    # - task: PublishPipelineArtifact@1
-    #   displayName: PublishSscanResult
-    #   inputs:
-    #     targetPath: '$(Pipeline.Workspace)/result.sarif'
-    #     artifact: 'CodeAnalysisLogs'
-    #     publishLocation: 'pipeline'
 
 - stage: analyzeJavascript
   dependsOn: builder
@@ -95,7 +46,7 @@ stages:
     - task: CmdLine@2
       inputs:
         script: 'pnpm install'
-        workingDirectory: '$(Build.SourcesDirectory)\sample_front_end_application'
+        workingDirectory: '$(Build.SourcesDirectory)\$(project)'
     - task: CmdLine@2
       inputs:
         script: 'curl https://github.com/github/codeql-cli-binaries/releases/download/v2.9.3/codeql-win64.zip -O -J -L'
@@ -110,9 +61,12 @@ stages:
         script: |
           git clone https://github.com/github/codeql.git queries
           mkdir databases
-          codeql database create -l=javascript -s=$(Build.SourcesDirectory)\sample_front_end_application -c="pnpm run build" databases\sample_front_end_application
-          codeql query compile -j=0 --fast-compilation queries\javascript\ql\src\codeql-suites\javascript-security-extended.qls
-          codeql database analyze databases\sample_front_end_application --format=sarif-latest --output=$(Pipeline.Workspace)\analyzerRes_js.sarif queries\javascript\ql\src\codeql-suites\javascript-security-extended.qls
+          codeql database create -l=javascript -s=$(Build.SourcesDirectory)\$(project) -c="pnpm run build" databases\$(project)
+        workingDirectory: '$(Pipeline.Workspace)\codeql'
+    - task: CmdLine@2
+      inputs:
+        script: |
+          codeql database analyze databases\$(project) -j=0 --fast-compilation --format=sarif-latest --output=$(Pipeline.Workspace)\analyzerRes_js.sarif queries\javascript\ql\src\codeql-suites\javascript-security-extended.qls
         workingDirectory: '$(Pipeline.Workspace)\codeql'
     - task: PublishBuildArtifacts@1
       inputs:
@@ -136,10 +90,3 @@ stages:
         buildType: 'current'
         artifactName: 'app'
         targetPath: '$(Pipeline.Workspace)'
-    - task: AzureRmWebAppDeployment@4
-      inputs:
-        ConnectionType: 'AzureRM'
-        azureSubscription: 'testConnection'
-        appType: 'webApp'
-        WebAppName: 'kurunin52SampleWebApp'
-        packageForLinux: '$(Pipeline.Workspace)/**/*.zip'
