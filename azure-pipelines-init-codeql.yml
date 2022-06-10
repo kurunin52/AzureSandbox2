@@ -27,7 +27,7 @@ steps:
 - task: CmdLine@2
   inputs:
     script: |
-      codeql query compile queries\csharp\ql\src\codeql-suites\csharp-security-and-quality.qls
+      codeql query compile --compilation-cache='$(Pipeline.Workspace)\codeql\.cache' queries\csharp\ql\src\codeql-suites\csharp-security-and-quality.qls
     workingDirectory: '$(Pipeline.Workspace)\codeql'
 - task: ArchiveFiles@2
   inputs:
