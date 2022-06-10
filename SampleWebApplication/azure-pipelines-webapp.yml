@@ -14,7 +14,7 @@ variables:
   buildConfiguration: 'Release'
 resources:
   pipelines:
-    - pipeline: CodeQL
+    - pipeline: CodeQL_Cached
       source: AzureSandbox_InitCodeQL
 
 stages:
@@ -22,11 +22,11 @@ stages:
   jobs: 
   - job: analyze
     steps: 
-    - download: CodeQL
+    - download: CodeQL_Cached
       artifact: codeql
     - task: ExtractFiles@1
       inputs:
-        archiveFilePatterns: '$(Pipeline.Workspace)/CodeQL/codeql/codeql.zip'
+        archiveFilePatterns: '$(Pipeline.Workspace)/CodeQL_Cached/codeql/codeql.zip'
         destinationFolder: '$(Pipeline.Workspace)'
         cleanDestinationFolder: false
         overwriteExistingFiles: false
