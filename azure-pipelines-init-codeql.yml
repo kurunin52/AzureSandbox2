@@ -88,8 +88,7 @@ stages:
       displayName: Cache queries for javascript
       inputs:
         script: |
-          codeql query compile --compilation-cache=.cache_js $(Pipeline.Workspace)\queries\javascript\ql\src\LanguageFeatures
-          codeql query compile --compilation-cache=.cache_js $(Pipeline.Workspace)\queries\javascript\ql\src\codeql-suites\javascript-lgtm.qls
+          codeql query compile --compilation-cache=.cache_js $(Pipeline.Workspace)\queries\javascript\ql\src\codeql-suites\javascript-security-extended.qls
         workingDirectory: '$(Pipeline.Workspace)\codeql'
     - task: ArchiveFiles@2
       inputs:
