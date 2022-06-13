@@ -25,9 +25,17 @@ steps:
       git clone https://github.com/github/codeql.git queries
     workingDirectory: '$(Pipeline.Workspace)'
 - task: CmdLine@2
+  displayName: Cache queries for CSharp
   inputs:
     script: |
-      codeql query compile --compilation-cache=.cache $(Pipeline.Workspace)\queries\csharp\ql\src\codeql-suites\csharp-lgtm.qls
+      codeql query compile --compilation-cache=.cache_cs $(Pipeline.Workspace)\queries\csharp\ql\src\codeql-suites\csharp-lgtm.qls
+    workingDirectory: '$(Pipeline.Workspace)\codeql'
+- task: CmdLine@2
+  displayName: Cache queries for javascript
+  inputs:
+    script: |
+      codeql query compile --compilation-cache=.cache_js $(Pipeline.Workspace)\queries\javascript\ql\src\LanguageFeatures
+      codeql query compile --compilation-cache=.cache_js $(Pipeline.Workspace)\queries\javascript\ql\src\codeql-suites\javascript-lgtm.qls
     workingDirectory: '$(Pipeline.Workspace)\codeql'
 - task: ArchiveFiles@2
   inputs:
