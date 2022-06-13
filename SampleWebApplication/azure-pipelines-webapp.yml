@@ -12,8 +12,38 @@ variables:
   solution: 'SampleWebApplication/SampleWebApplication.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
+resources:
+  pipelines:
+    - pipeline: CodeQL_Cached
+      source: AzureSandbox_InitCodeQL
 
 stages:
+- stage: analyzeCSharp
+  jobs: 
+  - job: analyze
+    steps: 
+    - download: CodeQL_Cached
+      artifact: codeql
+    - task: ExtractFiles@1
+      inputs:
+        archiveFilePatterns: '$(Pipeline.Workspace)/CodeQL_Cached/codeql/codeql.zip'
+        destinationFolder: '$(Pipeline.Workspace)'
+        cleanDestinationFolder: false
+        overwriteExistingFiles: false
+    - task: CmdLine@2
+      inputs:
+        script: |
+          git clone https://github.com/github/codeql.git queries
+          mkdir databases
+          codeql database create -l=csharp -s=$(Build.SourcesDirectory)\SampleWebApplication databases\SampleWebApplication
+          codeql database analyze databases\SampleWebApplication --format=sarif-latest --output=$(Pipeline.Workspace)\analyzerRes_cs.sarif --compilation-cache=.cache queries\csharp\ql\src\codeql-suites\csharp-lgtm.qls
+        workingDirectory: '$(Pipeline.Workspace)\codeql'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Pipeline.Workspace)\analyzerRes_cs.sarif'
+        ArtifactName: 'CodeAnalysisLogs'
+        publishLocation: 'Container'
+
 - stage: builder
   jobs: 
   - job: putAppConfiguration
@@ -74,35 +104,6 @@ stages:
     - task: PublishBuildArtifacts@1
       inputs:
         PathtoPublish: '$(Pipeline.Workspace)/result.sarif'
-        ArtifactName: 'CodeAnalysisLogs'
-        publishLocation: 'Container'
-
-- stage: analyzeCSharp
-  dependsOn: builder
-  jobs: 
-  - job: analyze
-    steps: 
-    - task: CmdLine@2
-      inputs:
-        script: 'curl https://github.com/github/codeql-cli-binaries/releases/download/v2.9.3/codeql-win64.zip -O -J -L'
-    - task: ExtractFiles@1
-      inputs:
-        archiveFilePatterns: 'codeql-win64.zip'
-        destinationFolder: '$(Pipeline.Workspace)'
-        cleanDestinationFolder: false
-        overwriteExistingFiles: false
-    - task: CmdLine@2
-      inputs:
-        script: |
-          git clone https://github.com/github/codeql.git queries
-          mkdir databases
-          codeql database create -l=csharp -s=$(Build.SourcesDirectory)\SampleWebApplication databases\SampleWebApplication
-          codeql query compile -j=0 --fast-compilation queries\csharp\ql\src\codeql-suites\csharp-security-extended.qls
-          codeql database analyze databases\SampleWebApplication --format=sarif-latest --output=$(Pipeline.Workspace)\analyzerRes_cs.sarif queries\csharp\ql\src\codeql-suites\csharp-security-extended.qls
-        workingDirectory: '$(Pipeline.Workspace)\codeql'
-    - task: PublishBuildArtifacts@1
-      inputs:
-        PathtoPublish: '$(Pipeline.Workspace)\analyzerRes_cs.sarif'
         ArtifactName: 'CodeAnalysisLogs'
         publishLocation: 'Container'
 
