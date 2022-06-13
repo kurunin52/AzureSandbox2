@@ -67,10 +67,15 @@ stages:
           mkdir databases
           codeql database create -l=javascript -s=$(Build.SourcesDirectory)\$(project) -c="pnpm run build" databases\$(project)
         workingDirectory: '$(Pipeline.Workspace)\codeql'
+    # - task: CmdLine@2
+    #   inputs:
+    #     script: |
+    #       codeql database analyze databases\$(project) --format=sarif-latest --output=$(Pipeline.Workspace)\analyzerRes_js.sarif queries\javascript\ql\src\codeql-suites\javascript-security-extended.qls
+    #     workingDirectory: '$(Pipeline.Workspace)\codeql'
     - task: CmdLine@2
       inputs:
         script: |
-          codeql database analyze databases\$(project) --format=sarif-latest --output=$(Pipeline.Workspace)\analyzerRes_js.sarif queries\javascript\ql\src\codeql-suites\javascript-security-extended.qls
+          codeql database analyze databases\$(project) --format=sarif-latest --output=$(Pipeline.Workspace)\analyzerRes_js.sarif --download codeql/javascript-queries
         workingDirectory: '$(Pipeline.Workspace)\codeql'
     - task: PublishBuildArtifacts@1
       inputs:
