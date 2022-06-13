@@ -9,9 +9,6 @@ pr: none
 pool:
   vmImage: 'windows-latest'
 
-variables: 
-  CodeQLVersion: v2.9.3
-
 stages: 
 - stage: DownloadBinary
   jobs: 
