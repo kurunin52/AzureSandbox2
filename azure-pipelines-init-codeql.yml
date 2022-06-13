@@ -9,43 +9,92 @@ pr: none
 pool:
   vmImage: 'windows-latest'
 
-steps:
-- task: CmdLine@2
-  inputs:
-    script: 'curl https://github.com/github/codeql-cli-binaries/releases/download/v2.9.3/codeql-win64.zip -O -J -L'
-- task: ExtractFiles@1
-  inputs:
-    archiveFilePatterns: 'codeql-win64.zip'
-    destinationFolder: '$(Pipeline.Workspace)'
-    cleanDestinationFolder: false
-    overwriteExistingFiles: false
-- task: CmdLine@2
-  inputs:
-    script: |
-      git clone https://github.com/github/codeql.git queries
-    workingDirectory: '$(Pipeline.Workspace)'
-- task: CmdLine@2
-  displayName: Cache queries for CSharp
-  inputs:
-    script: |
-      codeql query compile --compilation-cache=.cache_cs $(Pipeline.Workspace)\queries\csharp\ql\src\codeql-suites\csharp-lgtm.qls
-    workingDirectory: '$(Pipeline.Workspace)\codeql'
-- task: CmdLine@2
-  displayName: Cache queries for javascript
-  inputs:
-    script: |
-      codeql query compile --compilation-cache=.cache_js $(Pipeline.Workspace)\queries\javascript\ql\src\LanguageFeatures
-      codeql query compile --compilation-cache=.cache_js $(Pipeline.Workspace)\queries\javascript\ql\src\codeql-suites\javascript-lgtm.qls
-    workingDirectory: '$(Pipeline.Workspace)\codeql'
-- task: ArchiveFiles@2
-  inputs:
-    rootFolderOrFile: '$(Pipeline.Workspace)\codeql'
-    includeRootFolder: true
-    archiveType: 'zip'
-    archiveFile: '$(Build.ArtifactStagingDirectory)/codeql.zip'
-    replaceExistingArchive: true
-- task: PublishPipelineArtifact@1
-  inputs:
-    targetPath: '$(Build.ArtifactStagingDirectory)/codeql.zip'
-    artifact: 'codeql'
-    publishLocation: 'pipeline'
+variables: 
+  CodeQLVersion: v2.9.3
+
+jobs: 
+- job: downloadCodeQLbinary
+  steps:
+  - task: CmdLine@2
+    inputs:
+      script: 'curl https://github.com/github/codeql-cli-binaries/releases/download/$(CodeQLVersion)/codeql-win64.zip -O -J -L'
+  - task: PublishPipelineArtifact@1
+    inputs:
+      targetPath: 'codeql-win64.zip'
+      artifact: 'CodeQLBinary'
+      publishLocation: 'pipeline'
+
+- job: CacheCSharpQuery
+  steps: 
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      buildType: 'current'
+      artifactName: 'CodeQLBinary'
+      targetPath: '$(Pipeline.Workspace)'
+  - task: ExtractFiles@1
+    inputs:
+      archiveFilePatterns: 'codeql-win64.zip'
+      destinationFolder: '$(Pipeline.Workspace)'
+      cleanDestinationFolder: false
+      overwriteExistingFiles: false
+  - task: CmdLine@2
+    inputs:
+      script: |
+        git clone https://github.com/github/codeql.git queries
+      workingDirectory: '$(Pipeline.Workspace)'
+  - task: CmdLine@2
+    displayName: Cache queries for CSharp
+    inputs:
+      script: |
+        codeql query compile --compilation-cache=.cache_cs $(Pipeline.Workspace)\queries\csharp\ql\src\codeql-suites\csharp-lgtm.qls
+      workingDirectory: '$(Pipeline.Workspace)\codeql'
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: '$(Pipeline.Workspace)\codeql\.cache_cs'
+      includeRootFolder: true
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/codeql_cs_cache.zip'
+      replaceExistingArchive: true
+  - task: PublishPipelineArtifact@1
+    inputs:
+      targetPath: '$(Build.ArtifactStagingDirectory)/codeql_cs_cache.zip'
+      artifact: 'cache'
+      publishLocation: 'pipeline'
+
+- job: CacheJavascriptQuery
+  steps: 
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      buildType: 'current'
+      artifactName: 'CodeQLBinary'
+      targetPath: '$(Pipeline.Workspace)'
+  - task: ExtractFiles@1
+    inputs:
+      archiveFilePatterns: 'codeql-win64.zip'
+      destinationFolder: '$(Pipeline.Workspace)'
+      cleanDestinationFolder: false
+      overwriteExistingFiles: false
+  - task: CmdLine@2
+    inputs:
+      script: |
+        git clone https://github.com/github/codeql.git queries
+      workingDirectory: '$(Pipeline.Workspace)'
+  - task: CmdLine@2
+    displayName: Cache queries for javascript
+    inputs:
+      script: |
+        codeql query compile --compilation-cache=.cache_js $(Pipeline.Workspace)\queries\javascript\ql\src\LanguageFeatures
+        codeql query compile --compilation-cache=.cache_js $(Pipeline.Workspace)\queries\javascript\ql\src\codeql-suites\javascript-lgtm.qls
+      workingDirectory: '$(Pipeline.Workspace)\codeql'
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: '$(Pipeline.Workspace)/codeql/.cache_js'
+      includeRootFolder: true
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/codeql_cache_js.zip'
+      replaceExistingArchive: true
+  - task: PublishPipelineArtifact@1
+    inputs:
+      targetPath: '$(Build.ArtifactStagingDirectory)/codeql_cache_js.zip'
+      artifact: 'cache'
+      publishLocation: 'pipeline'
