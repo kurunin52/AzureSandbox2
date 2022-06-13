@@ -38,7 +38,7 @@ stages:
         targetPath: '$(Pipeline.Workspace)'
     - task: ExtractFiles@1
       inputs:
-        archiveFilePatterns: 'codeql-win64.zip'
+        archiveFilePatterns: '$(Pipeline.Workspace)\codeql-win64.zip'
         destinationFolder: '$(Pipeline.Workspace)'
         cleanDestinationFolder: false
         overwriteExistingFiles: false
@@ -75,7 +75,7 @@ stages:
         targetPath: '$(Pipeline.Workspace)'
     - task: ExtractFiles@1
       inputs:
-        archiveFilePatterns: 'codeql-win64.zip'
+        archiveFilePatterns: '$(Pipeline.Workspace)\codeql-win64.zip'
         destinationFolder: '$(Pipeline.Workspace)'
         cleanDestinationFolder: false
         overwriteExistingFiles: false
