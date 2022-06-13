@@ -75,7 +75,7 @@ stages:
     - task: CmdLine@2
       inputs:
         script: |
-          codeql database analyze databases\$(project) --format=sarif-latest --output=$(Pipeline.Workspace)\analyzerRes_js.sarif --download codeql/javascript-all
+          codeql database analyze databases\$(project) --format=sarif-latest --output=$(Pipeline.Workspace)\analyzerRes_js.sarif --download codeql/javascript-queries
         workingDirectory: '$(Pipeline.Workspace)\codeql'
     - task: PublishBuildArtifacts@1
       inputs:
