@@ -13,7 +13,7 @@ variables:
   CodeQLVersion: v2.9.3
 
 stages: 
-- stage: Download Binary
+- stage: DownloadBinary
   jobs: 
   - job: downloadCodeQLbinary
     steps:
@@ -27,7 +27,7 @@ stages:
         publishLocation: 'pipeline'
 
 - stage: CacheQueries
-  dependsOn: Download Binary
+  dependsOn: DownloadBinary
   jobs: 
   - job: CacheCSharpQuery
     steps: 
