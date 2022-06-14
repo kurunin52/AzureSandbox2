@@ -1,0 +1,58 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger: none
+
+pool:
+  vmImage: windows-latest
+
+stages:
+- stage: analysis
+  jobs: 
+  - job: buildApp
+    steps:
+    - task: NuGetToolInstaller@1
+    - task: NuGetCommand@2
+      inputs:
+        restoreSolution: '$(solution)'
+    # - task: VSBuild@1
+    #   inputs:
+    #     solution: '$(solution)'
+    #     msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)" /p:WarningLevel=0'
+    #     platform: '$(buildPlatform)'
+    #     configuration: '$(buildConfiguration)'
+    # - task: VSTest@2
+    #   inputs:
+    #     testSelector: 'testAssemblies'
+    #     testAssemblyVer2: |
+    #       **\*test*.dll
+    #       !**\*TestAdapter.dll
+    #       !**\obj\**
+    #     searchFolder: '$(System.DefaultWorkingDirectory)'
+    #     testRunTitle: 'simpleTest'
+    # - task: PublishTestResults@2
+    #   inputs:
+    #     testResultsFormat: 'NUnit'
+    #     testResultsFiles: '**/TEST-*.xml'
+    #     testRunTitle: 'simpleTest'
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'custom'
+        custom: 'tool'
+        arguments: 'install --global security-scan'
+    - task: CmdLine@2
+      inputs:
+        script: 'security-scan $(solution) --export=$(Pipeline.Workspace)\result.sarif'
+    - task: PublishPipelineArtifact@1
+      displayName: PublishApp
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)/SampleWebApplication.zip'
+        artifact: 'app'
+        publishLocation: 'pipeline'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Pipeline.Workspace)/result.sarif'
+        ArtifactName: 'CodeAnalysisLogs'
+        publishLocation: 'Container'
