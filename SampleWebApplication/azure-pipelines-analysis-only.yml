@@ -50,12 +50,6 @@ stages:
     - task: CmdLine@2
       inputs:
         script: 'security-scan $(solution) --export=$(Pipeline.Workspace)\result.sarif'
-    - task: PublishPipelineArtifact@1
-      displayName: PublishApp
-      inputs:
-        targetPath: '$(Build.ArtifactStagingDirectory)/SampleWebApplication.zip'
-        artifact: 'app'
-        publishLocation: 'pipeline'
     - task: PublishBuildArtifacts@1
       inputs:
         PathtoPublish: '$(Pipeline.Workspace)/result.sarif'
