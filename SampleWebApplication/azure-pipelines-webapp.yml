@@ -82,7 +82,7 @@ stages:
         publishLocation: 'Container'
 
 - stage: validation
-  dependsOn: analyzeCSharp
+  dependsOn: builder
   jobs:
   - deployment: DeployApp
     environment: 'SampleWebApplication'
