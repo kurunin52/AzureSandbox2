@@ -52,7 +52,7 @@ stages:
         workingDirectory: '$(Build.SourcesDirectory)\$(project)'
     - task: CmdLine@2
       inputs:
-        script: 'npm install @microsoft/eslint-formatter-sarif --save-dev'
+        script: 'pnpm install @microsoft/eslint-formatter-sarif --save-dev'
         workingDirectory: '$(Build.SourcesDirectory)\$(project)'
     - task: CmdLine@2
       inputs:
