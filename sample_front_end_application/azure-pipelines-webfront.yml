@@ -4,7 +4,6 @@
 # https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
 
 trigger: none
-pr: none
 
 pool:
   vmImage: 'windows-latest'
@@ -53,33 +52,15 @@ stages:
         workingDirectory: '$(Build.SourcesDirectory)\$(project)'
     - task: CmdLine@2
       inputs:
-        script: 'curl https://github.com/github/codeql-cli-binaries/releases/download/v2.9.3/codeql-win64.zip -O -J -L'
-    - task: ExtractFiles@1
-      inputs:
-        archiveFilePatterns: 'codeql-win64.zip'
-        destinationFolder: '$(Pipeline.Workspace)'
-        cleanDestinationFolder: false
-        overwriteExistingFiles: false
+        script: 'npm install @microsoft/eslint-formatter-sarif --save-dev'
+        workingDirectory: '$(Build.SourcesDirectory)\$(project)'
     - task: CmdLine@2
       inputs:
-        script: |
-          git clone https://github.com/github/codeql.git queries
-          mkdir databases
-          codeql database create -l=javascript -s=$(Build.SourcesDirectory)\$(project) -c="pnpm run build" databases\$(project)
-        workingDirectory: '$(Pipeline.Workspace)\codeql'
-    # - task: CmdLine@2
-    #   inputs:
-    #     script: |
-    #       codeql database analyze databases\$(project) --format=sarif-latest --output=$(Pipeline.Workspace)\analyzerRes_js.sarif queries\javascript\ql\src\codeql-suites\javascript-security-extended.qls
-    #     workingDirectory: '$(Pipeline.Workspace)\codeql'
-    - task: CmdLine@2
-      inputs:
-        script: |
-          codeql database analyze databases\$(project) --format=sarif-latest --output=$(Pipeline.Workspace)\analyzerRes_js.sarif --download codeql/javascript-queries
-        workingDirectory: '$(Pipeline.Workspace)\codeql'
+        script: 'node_modules/.bin/eslint.CMD -f @microsoft/eslint-formatter-sarif -o $(Pipeline.Workspace)\result.sarif src/* --no-error-on-unmatched-pattern'
+        workingDirectory: '$(Build.SourcesDirectory)\$(project)'
     - task: PublishBuildArtifacts@1
       inputs:
-        PathtoPublish: '$(Pipeline.Workspace)\analyzerRes_js.sarif'
+        PathtoPublish: '$(Pipeline.Workspace)\result.sarif'
         ArtifactName: 'CodeAnalysisLogs'
         publishLocation: 'Container'
 
