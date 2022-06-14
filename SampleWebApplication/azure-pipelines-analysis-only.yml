@@ -8,6 +8,11 @@ trigger: none
 pool:
   vmImage: windows-latest
 
+variables:
+  solution: 'SampleWebApplication/SampleWebApplication.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
 stages:
 - stage: analysis
   jobs: 
