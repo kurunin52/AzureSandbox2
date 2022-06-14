@@ -1,0 +1,41 @@
+# ASP.NET
+# Build and test ASP.NET projects.
+# Add steps that publish symbols, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
+
+trigger: none
+
+pool:
+  vmImage: 'windows-latest'
+variables:
+  project: 'sample_front_end_application'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+stages:
+- stage: analyzeJavascript
+  dependsOn: builder
+  jobs: 
+  - job: analyze
+    steps: 
+    - task: Npm@1
+      inputs:
+        command: 'custom'
+        customCommand: 'install -g pnpm'
+    - task: CmdLine@2
+      inputs:
+        script: 'pnpm install'
+        workingDirectory: '$(Build.SourcesDirectory)\$(project)'
+    - task: CmdLine@2
+      inputs:
+        script: 'pnpm install @microsoft/eslint-formatter-sarif --save-dev'
+        workingDirectory: '$(Build.SourcesDirectory)\$(project)'
+    - task: CmdLine@2
+      inputs:
+        script: 'node_modules/.bin/eslint.CMD -f @microsoft/eslint-formatter-sarif -o $(Pipeline.Workspace)\result.sarif --ext .ts,.vue src/'
+        workingDirectory: '$(Build.SourcesDirectory)\$(project)'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Pipeline.Workspace)\result.sarif'
+        ArtifactName: 'CodeAnalysisLogs'
+        publishLocation: 'Container'
