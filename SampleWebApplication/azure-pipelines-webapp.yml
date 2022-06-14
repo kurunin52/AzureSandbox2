@@ -18,39 +18,6 @@ resources:
       source: AzureSandbox_InitCodeQL
 
 stages:
-- stage: analyzeCSharp
-  jobs: 
-  - job: analyze
-    steps: 
-    - download: CodeQL_Cached
-      artifact: codeql
-    - task: ExtractFiles@1
-      inputs:
-        archiveFilePatterns: '$(Pipeline.Workspace)/CodeQL_Cached/codeql/codeql.zip'
-        destinationFolder: '$(Pipeline.Workspace)'
-        cleanDestinationFolder: false
-        overwriteExistingFiles: false
-    - task: CmdLine@2
-      # inputs:
-      #   script: |
-      #     git clone https://github.com/github/codeql.git queries
-      #     mkdir databases
-      #     codeql database create -l=csharp -s=$(Build.SourcesDirectory)\SampleWebApplication databases\SampleWebApplication
-      #     codeql database analyze databases\SampleWebApplication --format=sarif-latest --output=$(Pipeline.Workspace)\analyzerRes_cs.sarif --compilation-cache=.cache queries\csharp\ql\src\codeql-suites\csharp-lgtm.qls
-      #   workingDirectory: '$(Pipeline.Workspace)\codeql'
-    - task: CmdLine@2
-      inputs:
-        script: |
-          mkdir databases
-          codeql database create -l=csharp -s=$(Build.SourcesDirectory)\SampleWebApplication databases\SampleWebApplication
-          codeql database analyze databases\SampleWebApplication --format=sarif-latest --output=$(Pipeline.Workspace)\analyzerRes_cs.sarif --compilation-cache=.cache --download codeql/csharp-queries
-        workingDirectory: '$(Pipeline.Workspace)\codeql'
-    - task: PublishBuildArtifacts@1
-      inputs:
-        PathtoPublish: '$(Pipeline.Workspace)\analyzerRes_cs.sarif'
-        ArtifactName: 'CodeAnalysisLogs'
-        publishLocation: 'Container'
-
 - stage: builder
   jobs: 
   - job: putAppConfiguration
@@ -77,7 +44,7 @@ stages:
     - task: VSBuild@1
       inputs:
         solution: '$(solution)'
-        msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)"'
+        msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)" /p:WarningLevel=0'
         platform: '$(buildPlatform)'
         configuration: '$(buildConfiguration)'
     - task: VSTest@2
@@ -94,25 +61,25 @@ stages:
         testResultsFormat: 'NUnit'
         testResultsFiles: '**/TEST-*.xml'
         testRunTitle: 'simpleTest'
-    # - task: DotNetCoreCLI@2
-    #   inputs:
-    #     command: 'custom'
-    #     custom: 'tool'
-    #     arguments: 'install --global security-scan'
-    # - task: CmdLine@2
-    #   inputs:
-    #     script: 'security-scan $(solution) --export=$(Pipeline.Workspace)\result.sarif'
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'custom'
+        custom: 'tool'
+        arguments: 'install --global security-scan'
+    - task: CmdLine@2
+      inputs:
+        script: 'security-scan $(solution) --export=$(Pipeline.Workspace)\result.sarif'
     - task: PublishPipelineArtifact@1
       displayName: PublishApp
       inputs:
         targetPath: '$(Build.ArtifactStagingDirectory)/SampleWebApplication.zip'
         artifact: 'app'
         publishLocation: 'pipeline'
-    # - task: PublishBuildArtifacts@1
-    #   inputs:
-    #     PathtoPublish: '$(Pipeline.Workspace)/result.sarif'
-    #     ArtifactName: 'CodeAnalysisLogs'
-    #     publishLocation: 'Container'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Pipeline.Workspace)/result.sarif'
+        ArtifactName: 'CodeAnalysisLogs'
+        publishLocation: 'Container'
 
 - stage: validation
   dependsOn: analyzeCSharp
