@@ -31,12 +31,19 @@ stages:
         cleanDestinationFolder: false
         overwriteExistingFiles: false
     - task: CmdLine@2
+      # inputs:
+      #   script: |
+      #     git clone https://github.com/github/codeql.git queries
+      #     mkdir databases
+      #     codeql database create -l=csharp -s=$(Build.SourcesDirectory)\SampleWebApplication databases\SampleWebApplication
+      #     codeql database analyze databases\SampleWebApplication --format=sarif-latest --output=$(Pipeline.Workspace)\analyzerRes_cs.sarif --compilation-cache=.cache queries\csharp\ql\src\codeql-suites\csharp-lgtm.qls
+      #   workingDirectory: '$(Pipeline.Workspace)\codeql'
+    - task: CmdLine@2
       inputs:
         script: |
-          git clone https://github.com/github/codeql.git queries
           mkdir databases
           codeql database create -l=csharp -s=$(Build.SourcesDirectory)\SampleWebApplication databases\SampleWebApplication
-          codeql database analyze databases\SampleWebApplication --format=sarif-latest --output=$(Pipeline.Workspace)\analyzerRes_cs.sarif --compilation-cache=.cache queries\csharp\ql\src\codeql-suites\csharp-lgtm.qls
+          codeql database analyze databases\SampleWebApplication --format=sarif-latest --output=$(Pipeline.Workspace)\analyzerRes_cs.sarif --compilation-cache=.cache --download codeql/csharp-queries
         workingDirectory: '$(Pipeline.Workspace)\codeql'
     - task: PublishBuildArtifacts@1
       inputs:
@@ -87,25 +94,25 @@ stages:
         testResultsFormat: 'NUnit'
         testResultsFiles: '**/TEST-*.xml'
         testRunTitle: 'simpleTest'
-    - task: DotNetCoreCLI@2
-      inputs:
-        command: 'custom'
-        custom: 'tool'
-        arguments: 'install --global security-scan'
-    - task: CmdLine@2
-      inputs:
-        script: 'security-scan $(solution) --export=$(Pipeline.Workspace)\result.sarif'
+    # - task: DotNetCoreCLI@2
+    #   inputs:
+    #     command: 'custom'
+    #     custom: 'tool'
+    #     arguments: 'install --global security-scan'
+    # - task: CmdLine@2
+    #   inputs:
+    #     script: 'security-scan $(solution) --export=$(Pipeline.Workspace)\result.sarif'
     - task: PublishPipelineArtifact@1
       displayName: PublishApp
       inputs:
         targetPath: '$(Build.ArtifactStagingDirectory)/SampleWebApplication.zip'
         artifact: 'app'
         publishLocation: 'pipeline'
-    - task: PublishBuildArtifacts@1
-      inputs:
-        PathtoPublish: '$(Pipeline.Workspace)/result.sarif'
-        ArtifactName: 'CodeAnalysisLogs'
-        publishLocation: 'Container'
+    # - task: PublishBuildArtifacts@1
+    #   inputs:
+    #     PathtoPublish: '$(Pipeline.Workspace)/result.sarif'
+    #     ArtifactName: 'CodeAnalysisLogs'
+    #     publishLocation: 'Container'
 
 - stage: validation
   dependsOn: analyzeCSharp
