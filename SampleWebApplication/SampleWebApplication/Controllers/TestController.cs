@@ -12,7 +12,8 @@ namespace SampleWebApplication.Controllers
         {
             var doc = new XmlDocument { XmlResolver = null };
             doc.LoadXml(@"<Config></Config>");
-            var results = doc.SelectNodes("/Config/Devices/Device[id='" + input + "']");
+            var t = new Random().Next();
+            var results = doc.SelectNodes("/Config/Devices/Device[id='" + input + t + "']");
 
             using (XmlWriter writer = XmlWriter.Create("employees.xml"))
             {
