@@ -56,7 +56,7 @@ stages:
         workingDirectory: '$(Build.SourcesDirectory)\$(project)'
     - task: CmdLine@2
       inputs:
-        script: 'node_modules/.bin/eslint.CMD -f @microsoft/eslint-formatter-sarif -o $(Pipeline.Workspace)\result.sarif src/* --no-error-on-unmatched-pattern'
+        script: 'node_modules/.bin/eslint.CMD -f @microsoft/eslint-formatter-sarif -o $(Pipeline.Workspace)\result.sarif --ext .ts,.vue src/'
         workingDirectory: '$(Build.SourcesDirectory)\$(project)'
     - task: PublishBuildArtifacts@1
       inputs:
