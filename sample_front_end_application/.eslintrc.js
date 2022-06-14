@@ -6,10 +6,11 @@ module.exports = {
   extends: [
     'plugin:vue/vue3-recommended',
     'plugin:vue/recommended',
-    '@vue/airbnb',
+    // '@vue/airbnb',
     '@vue/typescript/recommended',
-    'eslint:recommended',
+    // 'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
+    'plugin:security/recommended',
   ],
   parser: 'vue-eslint-parser',
   parserOptions: {
@@ -19,6 +20,6 @@ module.exports = {
   rules: {
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
-    'linebreak-style': 'warn',
+    // 'linebreak-style': 'windows',
   },
 };
