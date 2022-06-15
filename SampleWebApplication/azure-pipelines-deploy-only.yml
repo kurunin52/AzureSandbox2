@@ -8,7 +8,7 @@ trigger: none
 resources:
   pipelines:
     - pipeline: releasedPipeline
-      source: AzureSandbox (2)
+      source: AzureSandbox_WebApp_Build
 
 pool:
   vmImage: 'windows-latest'
