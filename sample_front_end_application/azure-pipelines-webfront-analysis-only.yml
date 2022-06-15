@@ -13,32 +13,7 @@ variables:
   buildConfiguration: 'Release'
 
 stages:
-- stage: builder
-  jobs: 
-  - job: buildApp
-    steps:
-    - task: Npm@1
-      inputs:
-        command: 'custom'
-        customCommand: 'install --global pnpm'
-    - task: CmdLine@2
-      inputs:
-        script: |
-          pnpm install
-        workingDirectory: '$(project)'
-    - task: CmdLine@2
-      inputs:
-        script: |
-          pnpm run build
-        workingDirectory: '$(project)'
-    - task: PublishBuildArtifacts@1
-      inputs:
-        PathtoPublish: '$(project)\dist'
-        ArtifactName: 'webfront'
-        publishLocation: 'Container'
-
 - stage: analyzeJavascript
-  dependsOn: builder
   jobs: 
   - job: analyze
     steps: 
@@ -63,20 +38,3 @@ stages:
         PathtoPublish: '$(Pipeline.Workspace)\result.sarif'
         ArtifactName: 'CodeAnalysisLogs'
         publishLocation: 'Container'
-
-- stage: validation
-  dependsOn: analyzeJavascript
-  jobs:
-  - deployment: DeployApp
-    environment: 'SampleWebfront'
-
-- stage: stageB
-  dependsOn: validation
-  jobs: 
-  - job: deployApp
-    steps:
-    - task: DownloadPipelineArtifact@2
-      inputs:
-        buildType: 'current'
-        artifactName: 'webfront'
-        targetPath: '$(Pipeline.Workspace)'
