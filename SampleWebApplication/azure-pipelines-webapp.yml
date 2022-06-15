@@ -81,26 +81,26 @@ stages:
         ArtifactName: 'CodeAnalysisLogs'
         publishLocation: 'Container'
 
-- stage: validation
-  dependsOn: builder
-  jobs:
-  - deployment: DeployApp
-    environment: 'SampleWebApplication'
+# - stage: validation
+#   dependsOn: builder
+#   jobs:
+#   - deployment: DeployApp
+#     environment: 'SampleWebApplication'
 
-- stage: stageB
-  dependsOn: validation
-  jobs: 
-  - job: deployApp
-    steps:
-    - task: DownloadPipelineArtifact@2
-      inputs:
-        buildType: 'current'
-        artifactName: 'app'
-        targetPath: '$(Pipeline.Workspace)'
-    - task: AzureRmWebAppDeployment@4
-      inputs:
-        ConnectionType: 'AzureRM'
-        azureSubscription: 'testConnection'
-        appType: 'webApp'
-        WebAppName: 'kurunin52SampleWebApp'
-        packageForLinux: '$(Pipeline.Workspace)/**/*.zip'
+# - stage: stageB
+#   dependsOn: validation
+#   jobs: 
+#   - job: deployApp
+#     steps:
+#     - task: DownloadPipelineArtifact@2
+#       inputs:
+#         buildType: 'current'
+#         artifactName: 'app'
+#         targetPath: '$(Pipeline.Workspace)'
+#     - task: AzureRmWebAppDeployment@4
+#       inputs:
+#         ConnectionType: 'AzureRM'
+#         azureSubscription: 'testConnection'
+#         appType: 'webApp'
+#         WebAppName: 'kurunin52SampleWebApp'
+#         packageForLinux: '$(Pipeline.Workspace)/**/*.zip'
