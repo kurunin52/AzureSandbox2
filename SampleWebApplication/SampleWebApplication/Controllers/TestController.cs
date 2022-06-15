@@ -25,7 +25,13 @@ namespace SampleWebApplication.Controllers
                 writer.WriteEndElement();
                 writer.WriteEndDocument();
             }
-            return results[0].InnerText;
+            //return results[0].InnerText;
+            var p = new System.Diagnostics.Process();
+            p.StartInfo.FileName = "exportLegacy.exe";
+            p.StartInfo.Arguments = " -user " + input + " -role user";
+            p.Start();
+
+            return "value: " + input;
         }
     }
 }
