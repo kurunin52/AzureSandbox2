@@ -4,32 +4,45 @@
 # https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
 
 trigger: none
-pr: none
 
 resources:
   pipelines:
     - pipeline: releasedPipeline
-      source: AzureSandbox (2)
+      source: AzureSandbox_WebAPI_Build
 
 pool:
   vmImage: 'windows-latest'
 
-steps:
-# - task: DownloadPipelineArtifact@2
-#   inputs:
-#     buildType: 'specific'
-#     project: 'f7781e0a-92d0-4e2d-9f29-71ae5e5f598a'
-#     definition: '6'
-#     buildVersionToDownload: 'specific'
-#     pipelineId: '$(targetBuild)'
-#     artifactName: 'app'
-#     targetPath: '$(Pipeline.Workspace)'
-- download: releasedPipeline
-  artifact: app
-- task: AzureRmWebAppDeployment@4
-  inputs:
-    ConnectionType: 'AzureRM'
-    azureSubscription: 'testConnection'
-    appType: 'webApp'
-    WebAppName: 'kurunin52SampleWebApp'
-    packageForLinux: '$(Pipeline.Workspace)/**/*.zip'
+stages:
+- stage: validation
+  jobs:
+  - deployment: DeployApp
+    environment: 'SampleWebApplication'
+
+- stage: deploy
+  dependsOn: validation
+  jobs: 
+  - job: putAppConfiguration
+    steps:  
+    - task: AzureAppConfigurationPush@3
+      inputs:
+        azureSubscription: 'testConnection'
+        AppConfigurationEndpoint: 'https://appconfigimporttest.azconfig.io'
+        ConfigurationFile: 'config/appconfig.json'
+        Separator: ':'
+        Prefix: 'PRD:'
+        Label: 'Pushtest'
+        Tags: '{"isTest": "true"}'
+        Strict: false
+
+  - job: deployWebApp
+    steps:
+    - download: releasedPipeline
+      artifact: app
+    - task: AzureRmWebAppDeployment@4
+      inputs:
+        ConnectionType: 'AzureRM'
+        azureSubscription: 'testConnection'
+        appType: 'webApp'
+        WebAppName: 'kurunin52SampleWebApp'
+        packageForLinux: '$(Pipeline.Workspace)/**/*.zip'
