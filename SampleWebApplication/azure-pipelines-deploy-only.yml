@@ -14,22 +14,23 @@ resources:
 pool:
   vmImage: 'windows-latest'
 
-steps:
-# - task: DownloadPipelineArtifact@2
-#   inputs:
-#     buildType: 'specific'
-#     project: 'f7781e0a-92d0-4e2d-9f29-71ae5e5f598a'
-#     definition: '6'
-#     buildVersionToDownload: 'specific'
-#     pipelineId: '$(targetBuild)'
-#     artifactName: 'app'
-#     targetPath: '$(Pipeline.Workspace)'
-- download: releasedPipeline
-  artifact: app
-- task: AzureRmWebAppDeployment@4
-  inputs:
-    ConnectionType: 'AzureRM'
-    azureSubscription: 'testConnection'
-    appType: 'webApp'
-    WebAppName: 'kurunin52SampleWebApp'
-    packageForLinux: '$(Pipeline.Workspace)/**/*.zip'
+stages:
+- stage: validation
+  jobs:
+  - deployment: DeployApp
+    environment: 'SampleWebApplication'
+
+- stage: deploy
+  dependsOn: validation
+  jobs: 
+  - job: deployWebApp
+    steps:
+    - download: releasedPipeline
+      artifact: app
+    - task: AzureRmWebAppDeployment@4
+      inputs:
+        ConnectionType: 'AzureRM'
+        azureSubscription: 'testConnection'
+        appType: 'webApp'
+        WebAppName: 'kurunin52SampleWebApp'
+        packageForLinux: '$(Pipeline.Workspace)/**/*.zip'
